@@ -1,8 +1,17 @@
 import Image from "next/image";
 import { Button } from "../_components/ui/button";
 import { LogInIcon } from "lucide-react";
+import { SignInButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-export default function Login() {
+export default async function Login() {
+  const { userId } = await auth();
+
+  if (userId) {
+    redirect("/");
+  }
+
   return (
     <div className="grid h-full grid-cols-2">
       <div className="mx-auto flex h-full max-w-[550px] flex-col justify-center p-8">
@@ -20,10 +29,12 @@ export default function Login() {
           facilitando o controle do seu orçamento.
         </p>
 
-        <Button variant={"outline"}>
-          Fazer login ou criar conta
-          <LogInIcon className="ml-2" />
-        </Button>
+        <SignInButton>
+          <Button variant={"outline"}>
+            Fazer login ou criar conta
+            <LogInIcon className="ml-2" />
+          </Button>
+        </SignInButton>
       </div>
 
       <div className="relative h-full w-full">
