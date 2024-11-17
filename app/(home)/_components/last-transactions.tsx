@@ -31,14 +31,14 @@ export function LastTransactions({ lastTransactions }: LastTransactionsProps) {
     return "-";
   };
   return (
-    <ScrollArea className="rounded-mb border">
+    <ScrollArea className="rounded-md border">
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle className="font-bold">Últimas transações</CardTitle>
         <Button variant="outline" className="rounded-full font-bold" asChild>
           <Link href="/transactions">Ver mais</Link>
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
         {lastTransactions.map((transaction) => (
           <div
             key={transaction.id}
