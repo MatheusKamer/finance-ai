@@ -2,18 +2,27 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-export const POST = async (request: Request) => {
-  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
-    return NextResponse.error();
-  }
+export async function POST(request: Request) {
   const signature = request.headers.get("stripe-signature");
+
   if (!signature) {
-    return NextResponse.error();
+    return new Response("No signature", { status: 400 });
   }
+
   const text = await request.text();
+
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return new Response("No secret key", { status: 500 });
+  }
+
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2024-10-28.acacia",
   });
+
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    return new Response("No webhook secret", { status: 500 });
+  }
+
   const event = stripe.webhooks.constructEvent(
     text,
     signature,
@@ -22,12 +31,12 @@ export const POST = async (request: Request) => {
 
   switch (event.type) {
     case "invoice.paid": {
-      // Atualizar o usuário com o seu novo plano
       const { customer, subscription, subscription_details } =
         event.data.object;
+
       const clerkUserId = subscription_details?.metadata?.clerk_user_id;
       if (!clerkUserId) {
-        return NextResponse.error();
+        return new Response("No clerk user id", { status: 400 });
       }
       await clerkClient().users.updateUser(clerkUserId, {
         privateMetadata: {
@@ -41,13 +50,13 @@ export const POST = async (request: Request) => {
       break;
     }
     case "customer.subscription.deleted": {
-      // Remover plano premium do usuário
       const subscription = await stripe.subscriptions.retrieve(
         event.data.object.id,
       );
+
       const clerkUserId = subscription.metadata.clerk_user_id;
       if (!clerkUserId) {
-        return NextResponse.error();
+        return new Response("No clerk user id", { status: 400 });
       }
       await clerkClient().users.updateUser(clerkUserId, {
         privateMetadata: {
@@ -58,7 +67,8 @@ export const POST = async (request: Request) => {
           subscriptionPlan: null,
         },
       });
+      break;
     }
   }
   return NextResponse.json({ received: true });
-};
+}
