@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/app/_components/ui/button";
-import { createCheckout } from "../_actions/create-stripe-checkout";
+import { createStripeCheckout } from "../_actions/create-stripe-checkout";
 import { loadStripe } from "@stripe/stripe-js";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
@@ -9,7 +9,7 @@ import Link from "next/link";
 export function AcquirePlanButton() {
   const { user } = useUser();
   const handkeAcquirePlan = async () => {
-    const { sessionId } = await createCheckout();
+    const { sessionId } = await createStripeCheckout();
 
     if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
       throw new Error("Stripe public key not found");
