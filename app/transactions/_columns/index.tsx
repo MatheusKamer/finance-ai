@@ -1,14 +1,13 @@
 "use client";
 
-import { Button } from "@/app/_components/ui/button";
 import {
   TRANSACTION_CATEGORY_LABELS,
   TRANSACTION_PAYMENT_METHOD_LABELS,
 } from "@/app/_constants/transactions";
 import { Transaction, TransactionType } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
-import { TrashIcon } from "lucide-react";
 import { EditTransactionButton } from "../_components/edit-transaction-button";
+import DeleteTransactionButton from "../_components/delete-transaction-button";
 
 export const transactionColumns: ColumnDef<Transaction>[] = [
   {
@@ -70,21 +69,9 @@ export const transactionColumns: ColumnDef<Transaction>[] = [
       return (
         <div className="space-y-1">
           <EditTransactionButton transaction={transaction} />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-muted-foreground"
-            onClick={() => handleDelete(transaction.id)}
-          >
-            <TrashIcon />
-          </Button>
+          <DeleteTransactionButton transactionId={transaction.id} />
         </div>
       );
     },
   },
 ];
-
-const handleDelete = (id: string) => {
-  // Implement your delete logic here
-  console.log(`Deleting transaction with id: ${id}`);
-};
